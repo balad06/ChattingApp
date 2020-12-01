@@ -1,3 +1,4 @@
+import 'package:ChattingApp/widgets/imagePicker.dart';
 import 'package:flutter/services.dart';
 
 import 'package:flutter/material.dart';
@@ -215,6 +216,9 @@ class _LoginPageState extends State<LoginPage> {
             child: SingleChildScrollView(
               child: Column(
                 children: <Widget>[
+                  _authMode == AuthMode.Signup
+                      ? UserImage()
+                      : Container(),
                   TextFormField(
                     key: ValueKey('email'),
                     decoration: InputDecoration(labelText: 'E-Mail'),
@@ -340,7 +344,8 @@ class _LoginPageState extends State<LoginPage> {
                   crossAxisAlignment: CrossAxisAlignment.center,
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: <Widget>[
-                    SizedBox(height: height * .125),
+                     _authMode == AuthMode.Login
+                            ? SizedBox(height: height * .125): SizedBox(height: height * .05),
                     Container(
                         padding:
                             EdgeInsets.symmetric(vertical: 10, horizontal: 12),

@@ -11,29 +11,32 @@ class ChatScreen extends StatelessWidget {
       appBar: AppBar(
         title: Text('Chatts'),
         actions: [
-          DropdownButton(
-              underline: Container(),
-              icon: Icon(
-                Icons.more_vert,
-                color: Colors.white,
-              ),
-              items: [
-                DropdownMenuItem(
-                  child: Row(
-                    children: [
-                      Icon(Icons.exit_to_app_outlined),
-                      SizedBox(width: 8),
-                      Text('Logout'),
-                    ],
-                  ),
-                  value: 'logout',
-                )
-              ],
-              onChanged: (item) {
-                if (item == 'logout') {
-                  FirebaseAuth.instance.signOut();
-                }
-              })
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: DropdownButton(
+                underline: Container(),
+                icon: Icon(
+                  Icons.more_vert,
+                  color: Colors.white,
+                ),
+                items: [
+                  DropdownMenuItem(
+                    child: Row(
+                      children: [
+                        Icon(Icons.exit_to_app_outlined),
+                        SizedBox(width: 8),
+                        Text('Logout'),
+                      ],
+                    ),
+                    value: 'logout',
+                  )
+                ],
+                onChanged: (item) {
+                  if (item == 'logout') {
+                    FirebaseAuth.instance.signOut();
+                  }
+                }),
+          )
         ],
       ),
       body: Container(
@@ -43,7 +46,7 @@ class ChatScreen extends StatelessWidget {
               child: Messages(),
             ),
             NewMessage(),
-            
+
           ],
         ),
       ),

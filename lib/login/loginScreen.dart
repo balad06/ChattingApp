@@ -1,9 +1,10 @@
 import 'package:ChattingApp/widgets/imagePicker.dart';
 import 'package:flutter/services.dart';
-
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 
 enum AuthMode { Signup, Login }
 
@@ -23,15 +24,17 @@ class _LoginPageState extends State<LoginPage> {
     'username': '',
     'password': '',
   };
+  File _userImageFile;
+
   var _isLoading = false;
   final _passwordController = TextEditingController();
-
-  Widget _submitButton() {
+  final _scaffoldKey = GlobalKey<ScaffoldState>();
+  Widget _submitButton(BuildContext context) {
     return InkWell(
       hoverColor: Colors.purple[900],
       onTap: () {
         setState(() {});
-        _submit();
+        _submit(context);
       },
       child: Container(
         height: 50,
@@ -39,7 +42,7 @@ class _LoginPageState extends State<LoginPage> {
         padding: EdgeInsets.symmetric(vertical: 15),
         alignment: Alignment.center,
         decoration: BoxDecoration(
-          color: Colors.yellow[600],
+          color: Colors.amber,
         ),
         child: Text(
           _authMode == AuthMode.Login ? 'Login' : 'Register',
@@ -75,7 +78,7 @@ class _LoginPageState extends State<LoginPage> {
               child: Text(
                 'Register',
                 style: TextStyle(
-                    color: Colors.purple,
+                    color: Colors.deepPurple,
                     fontSize: 17,
                     fontWeight: FontWeight.bold),
               ),
@@ -105,9 +108,9 @@ class _LoginPageState extends State<LoginPage> {
                 _switchAuthMode();
               },
               child: Text(
-                'Login',
+                'Login here',
                 style: TextStyle(
-                    color: Colors.purple,
+                    color: Colors.deepPurple,
                     fontSize: 17,
                     fontWeight: FontWeight.bold),
               ),
@@ -149,9 +152,12 @@ class _LoginPageState extends State<LoginPage> {
     );
   }
 
-  Future<void> _submit() async {
+  void _pickedImage(File image) {
+    _userImageFile = image;
+  }
+
+  void _submit(BuildContext context) async {
     if (!_formKey.currentState.validate()) {
-      // Invalid!
       return;
     }
     FocusScope.of(context).unfocus();
@@ -167,15 +173,25 @@ class _LoginPageState extends State<LoginPage> {
             email: _authData['email'].trim(),
             password: _authData['password'].trim());
       } else {
+        setState(() {
+          _isLoading = false;
+        });
+        if (_userImageFile == null) {
+          _scaffoldKey.currentState.showSnackBar(SnackBar(
+            content: Text('Please Pick a Image.'),
+          ));
+          return;
+        }
         userCredential = await _auth.createUserWithEmailAndPassword(
             email: _authData['email'].trim(),
             password: _authData['password'].trim());
+            FirebaseStorage.instance.ref();
         await FirebaseFirestore.instance
             .collection('users')
             .doc(userCredential.user.uid)
             .set({
           'username': _authData['username'],
-          'email': _authData['email']
+          'email': _authData['email'],
         });
       }
     } on PlatformException catch (error) {
@@ -217,41 +233,47 @@ class _LoginPageState extends State<LoginPage> {
               child: Column(
                 children: <Widget>[
                   _authMode == AuthMode.Signup
-                      ? UserImage()
+                      ? UserImage(_pickedImage)
                       : Container(),
-                  TextFormField(
-                    key: ValueKey('email'),
-                    decoration: InputDecoration(labelText: 'E-Mail'),
-                    keyboardType: TextInputType.emailAddress,
-                    validator: (value) {
-                      if (value.isEmpty || !value.contains('@')) {
-                        return 'Invalid email!';
-                      } else {
-                        return null;
-                      }
-                    },
-                    onSaved: (value) {
-                      _authData['email'] = value;
-                      print(_authData['email']);
-                    },
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: TextFormField(
+                      key: ValueKey('email'),
+                      decoration: InputDecoration(labelText: 'E-Mail'),
+                      keyboardType: TextInputType.emailAddress,
+                      validator: (value) {
+                        if (value.isEmpty || !value.contains('@')) {
+                          return 'Invalid email!';
+                        } else {
+                          return null;
+                        }
+                      },
+                      onSaved: (value) {
+                        _authData['email'] = value;
+                        print(_authData['email']);
+                      },
+                    ),
                   ),
                   _authMode == AuthMode.Signup
-                      ? TextFormField(
-                          enabled: _authMode == AuthMode.Signup,
-                          key: ValueKey('user'),
-                          decoration: InputDecoration(labelText: 'UserName'),
-                          validator: (value) {
-                            if (value.isEmpty || value.length < 4) {
-                              return 'Invalid Username!';
-                            } else {
-                              return null;
-                            }
-                          },
-                          onSaved: (value) {
-                            _authData['username'] = value;
-                            print(_authData['username']);
-                          },
-                        )
+                      ? Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: TextFormField(
+                            enabled: _authMode == AuthMode.Signup,
+                            key: ValueKey('user'),
+                            decoration: InputDecoration(labelText: 'UserName'),
+                            validator: (value) {
+                              if (value.isEmpty || value.length < 4) {
+                                return 'Invalid Username!';
+                              } else {
+                                return null;
+                              }
+                            },
+                            onSaved: (value) {
+                              _authData['username'] = value;
+                              print(_authData['username']);
+                            },
+                          ),
+                      )
                       : Container(),
                   TextFormField(
                     key: ValueKey('pass'),
@@ -270,34 +292,33 @@ class _LoginPageState extends State<LoginPage> {
                       print(_authData['password']);
                     },
                   ),
-                  AnimatedContainer(
-                    constraints: BoxConstraints(
-                      minHeight: _authMode == AuthMode.Signup ? 60 : 0,
-                      maxHeight: _authMode == AuthMode.Signup ? 120 : 0,
-                    ),
-                    duration: Duration(milliseconds: 300),
-                    curve: Curves.easeIn,
-                    child: TextFormField(
-                      key: ValueKey('cnpass'),
-                      enabled: _authMode == AuthMode.Signup,
-                      decoration:
-                          InputDecoration(labelText: 'Confirm Password'),
-                      obscureText: true,
-                      validator: _authMode == AuthMode.Signup
-                          ? (value) {
-                              if (value != _passwordController.text) {
-                                return 'Passwords do not match!';
-                              } else {
-                                return null;
-                              }
-                            }
-                          : null,
-                    ),
-                  ),
+                  // AnimatedContainer(
+                  //   constraints: BoxConstraints(
+                  //     minHeight: _authMode == AuthMode.Signup ? 60 : 0,
+                  //     maxHeight: _authMode == AuthMode.Signup ? 120 : 0,
+                  //   ),
+                  //   duration: Duration(milliseconds: 300),
+                  //   curve: Curves.easeIn,
+                  //   child: TextFormField(
+                  //     key: ValueKey('cnpass'),
+                  //     enabled: _authMode == AuthMode.Signup,
+                  //     decoration:
+                  //         InputDecoration(labelText: 'Confirm Password'),
+                  //     obscureText: true,
+                  //     validator: _authMode == AuthMode.Signup
+                  //         ? (value) {
+                  //             if (value != _passwordController.text) {
+                  //               return 'Passwords do not match!';
+                  //             } else {
+                  //               return null;
+                  //             }
+                  //           }
+                  //         : null,
+                  //   ),
+                  // ),
                   SizedBox(
                     height: 30,
                   ),
-                  // if (_isLoading) CircularProgressIndicator()
                 ],
               ),
             ),
@@ -308,7 +329,6 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   Widget checkboxorforgot() {
-    // String resetemail;
     if (_authMode == AuthMode.Login) {
       return Container(
         padding: EdgeInsets.symmetric(vertical: 10, horizontal: 12),
@@ -318,8 +338,8 @@ class _LoginPageState extends State<LoginPage> {
           child: Text(
             'Forgot Password ?',
             style: TextStyle(
-                color: Colors.purple,
-                fontSize: 14,
+                color: Colors.deepPurple,
+                fontSize: 16,
                 fontWeight: FontWeight.bold),
           ),
         ),
@@ -333,6 +353,7 @@ class _LoginPageState extends State<LoginPage> {
   Widget build(BuildContext context) {
     final height = MediaQuery.of(context).size.height;
     return Scaffold(
+      key: _scaffoldKey,
       body: Container(
         height: height,
         child: Stack(
@@ -344,8 +365,9 @@ class _LoginPageState extends State<LoginPage> {
                   crossAxisAlignment: CrossAxisAlignment.center,
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: <Widget>[
-                     _authMode == AuthMode.Login
-                            ? SizedBox(height: height * .125): SizedBox(height: height * .05),
+                    _authMode == AuthMode.Login
+                        ? SizedBox(height: height * .125)
+                        : SizedBox(height: height * .05),
                     Container(
                         padding:
                             EdgeInsets.symmetric(vertical: 10, horizontal: 12),
@@ -354,7 +376,7 @@ class _LoginPageState extends State<LoginPage> {
                             ? Row(
                                 children: [
                                   Container(
-                                    color: Colors.yellow[600],
+                                    color: Colors.amber,
                                     height: 35,
                                     width: 8,
                                   ),
@@ -377,7 +399,7 @@ class _LoginPageState extends State<LoginPage> {
                             : Row(
                                 children: [
                                   Container(
-                                    color: Colors.yellow[600],
+                                    color: Colors.amber,
                                     height: 35,
                                     width: 8,
                                   ),
@@ -402,7 +424,9 @@ class _LoginPageState extends State<LoginPage> {
                     SizedBox(height: height * .0015),
                     checkboxorforgot(),
                     SizedBox(height: height * .04),
-                    _isLoading ? CircularProgressIndicator() : _submitButton(),
+                    _isLoading
+                        ? CircularProgressIndicator()
+                        : _submitButton(context),
                     _createAccountLabel(),
                   ],
                 ),

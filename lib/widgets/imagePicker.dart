@@ -1,8 +1,11 @@
+// import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'dart:io';
 import 'package:image_picker/image_picker.dart';
 
 class UserImage extends StatefulWidget {
+  final void Function(File pickedImage) imagePickedFn;
+  UserImage(this.imagePickedFn);
   @override
   _UserImageState createState() => _UserImageState();
 }
@@ -10,11 +13,14 @@ class UserImage extends StatefulWidget {
 class _UserImageState extends State<UserImage> {
   File _pickedImage;
   void _pickImage() async {
-    final pickedImageFile =
-        await ImagePicker.pickImage(source: ImageSource.camera);
+    final picker = ImagePicker();
+final pickedImage = await picker.getImage(source: ImageSource.camera);
+final pickedImageFile = File(pickedImage.path); 
+
     setState(() {
       _pickedImage = pickedImageFile;
     });
+    widget.imagePickedFn(pickedImageFile);
   }
 
   @override

@@ -9,7 +9,16 @@ class ChatScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Chatts'),
+        backgroundColor: Colors.amber,
+        centerTitle: true,
+        elevation: 0,
+        title: Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Text(
+            'Chats',
+            style: TextStyle(color: Colors.black),
+          ),
+        ),
         actions: [
           Padding(
             padding: const EdgeInsets.all(8.0),
@@ -17,7 +26,7 @@ class ChatScreen extends StatelessWidget {
                 underline: Container(),
                 icon: Icon(
                   Icons.more_vert,
-                  color: Colors.white,
+                  color: Colors.black,
                 ),
                 items: [
                   DropdownMenuItem(
@@ -46,7 +55,6 @@ class ChatScreen extends StatelessWidget {
               child: Messages(),
             ),
             NewMessage(),
-
           ],
         ),
       ),

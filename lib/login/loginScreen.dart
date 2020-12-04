@@ -185,13 +185,19 @@ class _LoginPageState extends State<LoginPage> {
         userCredential = await _auth.createUserWithEmailAndPassword(
             email: _authData['email'].trim(),
             password: _authData['password'].trim());
-            FirebaseStorage.instance.ref();
+        final ref = FirebaseStorage.instance
+            .ref()
+            .child('userImages')
+            .child(_auth.currentUser.uid + '.jpg');
+        await ref.putFile(_userImageFile).whenComplete(() => null);
+       final imageUrl= await  ref.getDownloadURL();
         await FirebaseFirestore.instance
             .collection('users')
             .doc(userCredential.user.uid)
             .set({
           'username': _authData['username'],
           'email': _authData['email'],
+          'image_url':imageUrl,
         });
       }
     } on PlatformException catch (error) {
@@ -256,8 +262,8 @@ class _LoginPageState extends State<LoginPage> {
                   ),
                   _authMode == AuthMode.Signup
                       ? Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: TextFormField(
+                          padding: const EdgeInsets.all(8.0),
+                          child: TextFormField(
                             enabled: _authMode == AuthMode.Signup,
                             key: ValueKey('user'),
                             decoration: InputDecoration(labelText: 'UserName'),
@@ -273,7 +279,7 @@ class _LoginPageState extends State<LoginPage> {
                               print(_authData['username']);
                             },
                           ),
-                      )
+                        )
                       : Container(),
                   TextFormField(
                     key: ValueKey('pass'),

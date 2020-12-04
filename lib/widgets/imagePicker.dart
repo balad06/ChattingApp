@@ -1,4 +1,3 @@
-// import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'dart:io';
 import 'package:image_picker/image_picker.dart';
@@ -14,7 +13,7 @@ class _UserImageState extends State<UserImage> {
   File _pickedImage;
   void _pickImage() async {
     final picker = ImagePicker();
-final pickedImage = await picker.getImage(source: ImageSource.camera);
+final pickedImage = await picker.getImage(source: ImageSource.camera,imageQuality: 50,maxWidth: 150);
 final pickedImageFile = File(pickedImage.path); 
 
     setState(() {

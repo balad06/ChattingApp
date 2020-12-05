@@ -22,6 +22,10 @@ class MyApp extends StatelessWidget {
         visualDensity: VisualDensity.adaptivePlatformDensity,
       ),
       home: StreamBuilder(stream:FirebaseAuth.instance.authStateChanges() ,builder: (ctx,userSnapShot){
+        if (userSnapShot.connectionState == ConnectionState.waiting) {
+          return Center(child: Text('Loading....'));      
+        }
+        
         if(userSnapShot.hasData){
           return ChatScreen();
         }

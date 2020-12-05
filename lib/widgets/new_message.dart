@@ -34,6 +34,9 @@ class _NewMessageState extends State<NewMessage> {
         children: [
           Expanded(
             child: TextFormField(
+              textCapitalization: TextCapitalization.sentences,
+              autocorrect: true,
+              enableSuggestions: true,
               controller: _controller,
               decoration: InputDecoration(labelText: 'Send a message...'),
               onChanged: (value) {

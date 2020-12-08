@@ -298,30 +298,6 @@ class _LoginPageState extends State<LoginPage> {
                       print(_authData['password']);
                     },
                   ),
-                  // AnimatedContainer(
-                  //   constraints: BoxConstraints(
-                  //     minHeight: _authMode == AuthMode.Signup ? 60 : 0,
-                  //     maxHeight: _authMode == AuthMode.Signup ? 120 : 0,
-                  //   ),
-                  //   duration: Duration(milliseconds: 300),
-                  //   curve: Curves.easeIn,
-                  //   child: TextFormField(
-                  //     key: ValueKey('cnpass'),
-                  //     enabled: _authMode == AuthMode.Signup,
-                  //     decoration:
-                  //         InputDecoration(labelText: 'Confirm Password'),
-                  //     obscureText: true,
-                  //     validator: _authMode == AuthMode.Signup
-                  //         ? (value) {
-                  //             if (value != _passwordController.text) {
-                  //               return 'Passwords do not match!';
-                  //             } else {
-                  //               return null;
-                  //             }
-                  //           }
-                  //         : null,
-                  //   ),
-                  // ),
                   SizedBox(
                     height: 30,
                   ),

@@ -40,7 +40,7 @@ class _ChatScreenState extends State<ChatScreen> {
         title: Padding(
           padding: const EdgeInsets.all(8.0),
           child: Text(
-            'Chats',
+            'Global Chats',
             style: TextStyle(color: Colors.black),
           ),
         ),

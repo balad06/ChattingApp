@@ -1,14 +1,11 @@
+import 'package:ChattingApp/pages/mediaPreview.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:video_player/video_player.dart';
 import 'package:medcorder_audio/medcorder_audio.dart';
-
-// import 'dart:async';
-// import 'dart:io';
-
-// import 'package:flutter/foundation.dart';
+import 'dart:io';
 
 class NewMessage extends StatefulWidget {
   @override
@@ -18,11 +15,11 @@ class NewMessage extends StatefulWidget {
 class _NewMessageState extends State<NewMessage> {
   var _message = '';
   final _controller = new TextEditingController();
-  PickedFile _imageFile;
+  File _imageFile;
   // dynamic _pickImageError;
   bool isVideo = false;
+  File vidfile;
   VideoPlayerController _vcontroller;
-  // VideoPlayerController _toBeDisposed;
   MedcorderAudio audioModule = new MedcorderAudio();
   bool canRecord = false;
   double recordPower = 0.0;
@@ -37,16 +34,22 @@ class _NewMessageState extends State<NewMessage> {
       await _vcontroller.setVolume(0.0);
     }
     if (isVideo) {
-      final PickedFile file = await _picker.getVideo(
-          source: source, maxDuration: const Duration(seconds: 10));
-      // await _playVideo(file);
+      final file = await _picker.getVideo(
+          source: source, maxDuration: const Duration(seconds: 60));
+      vidfile = File(file.path);
+      Navigator.of(context)
+          .pushNamed(MediaPreview.id, arguments: [vidfile, isVideo]);
     } else {
       final pickedFile = await _picker.getImage(
         source: source,
+        imageQuality: 50,
       );
       setState(() {
-        _imageFile = pickedFile;
+        _imageFile = File(pickedFile.path);
       });
+      print('preview');
+      Navigator.of(context)
+          .pushNamed(MediaPreview.id, arguments: [_imageFile, isVideo]);
     }
   }
 
@@ -140,7 +143,12 @@ class _NewMessageState extends State<NewMessage> {
       padding: EdgeInsets.all(8),
       child: Row(
         children: [
-          IconButton(icon: Icon(Icons.emoji_emotions), onPressed: () {}),
+          IconButton(
+              icon: Icon(
+                Icons.emoji_emotions,
+                color: Colors.amber,
+              ),
+              onPressed: () {}),
           Expanded(
             child: isRecord
                 ? new Text('recording: ' + recordPosition.toString())
@@ -201,6 +209,7 @@ class _NewMessageState extends State<NewMessage> {
                       isVideo = false;
                     });
                     _mediaMessage(ImageSource.camera);
+                    Navigator.of(context).pop();
                   },
                   child: Text('Picture from camera'),
                 ),
@@ -210,6 +219,7 @@ class _NewMessageState extends State<NewMessage> {
                       isVideo = false;
                     });
                     _mediaMessage(ImageSource.gallery);
+                    Navigator.of(context).pop();
                   },
                   child: Text('Picture from gallery'),
                 ),
@@ -219,6 +229,7 @@ class _NewMessageState extends State<NewMessage> {
                       isVideo = true;
                     });
                     _mediaMessage(ImageSource.camera);
+                    Navigator.of(context).pop();
                   },
                   child: Text('Video from camera'),
                 ),
@@ -228,6 +239,7 @@ class _NewMessageState extends State<NewMessage> {
                       isVideo = true;
                     });
                     _mediaMessage(ImageSource.gallery);
+                    Navigator.of(context).pop();
                   },
                   child: Text('Video from gallery'),
                 ),

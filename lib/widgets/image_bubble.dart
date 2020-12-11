@@ -1,3 +1,4 @@
+import 'package:ChattingApp/widgets/media_enlarge.dart';
 import 'package:flutter/material.dart';
 
 class ImageBubble extends StatelessWidget {
@@ -36,10 +37,16 @@ class ImageBubble extends StatelessWidget {
                   textAlign: isMe ? TextAlign.right : TextAlign.left,
                 ),
               ),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 5),
-                child: CircleAvatar(
-                  backgroundImage: NetworkImage(userImageurl),
+              InkWell(
+                onTap: () {
+                  Navigator.of(context)
+                      .pushNamed(Media.id, arguments: [userImageurl, false]);
+                },
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 5),
+                  child: CircleAvatar(
+                    backgroundImage: NetworkImage(userImageurl),
+                  ),
                 ),
               ),
             ],
@@ -75,8 +82,15 @@ class ImageBubble extends StatelessWidget {
                             ? CrossAxisAlignment.end
                             : CrossAxisAlignment.start,
                         children: [
+                          InkWell(
+                            onTap: () {
+                              Navigator.of(context).pushNamed(Media.id,
+                                  arguments: [chatImage, false]);
+                            },
+                            child: Image.network(chatImage),
+                          ),
                           Text(
-                            chatImage,
+                            message,
                             style: TextStyle(
                               color: isMe ? Colors.black : Colors.white,
                             ),

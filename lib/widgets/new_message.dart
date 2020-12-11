@@ -6,6 +6,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:video_player/video_player.dart';
 import 'package:medcorder_audio/medcorder_audio.dart';
 import 'dart:io';
+import 'package:flutter_emoji_keyboard/flutter_emoji_keyboard.dart';
 
 class NewMessage extends StatefulWidget {
   @override
@@ -18,6 +19,7 @@ class _NewMessageState extends State<NewMessage> {
   File _imageFile;
   // dynamic _pickImageError;
   bool isVideo = false;
+  bool isEmoji = false;
   File vidfile;
   VideoPlayerController _vcontroller;
   MedcorderAudio audioModule = new MedcorderAudio();
@@ -118,6 +120,11 @@ class _NewMessageState extends State<NewMessage> {
     }
   }
 
+  void onEmojiSelected(Emoji emoji) {
+    _controller.text += emoji.text;
+    _message += emoji.text;
+  }
+
   void _sendMessage() async {
     FocusScope.of(context).unfocus();
     final user = FirebaseAuth.instance.currentUser;
@@ -131,6 +138,7 @@ class _NewMessageState extends State<NewMessage> {
       'userId': user.uid,
       'username': userData['username'],
       'userImage': userData['image_url'],
+      'isImage': false,
     });
     _controller.clear();
     _message = '';
@@ -141,55 +149,70 @@ class _NewMessageState extends State<NewMessage> {
     return Container(
       margin: EdgeInsets.only(top: 8),
       padding: EdgeInsets.all(8),
-      child: Row(
+      child: Column(
         children: [
-          IconButton(
-              icon: Icon(
-                Icons.emoji_emotions,
-                color: Colors.amber,
-              ),
-              onPressed: () {}),
-          Expanded(
-            child: isRecord
-                ? new Text('recording: ' + recordPosition.toString())
-                : TextFormField(
-                    textCapitalization: TextCapitalization.sentences,
-                    autocorrect: true,
-                    enableSuggestions: true,
-                    controller: _controller,
-                    decoration: InputDecoration(
-                        labelText: 'Send a message...',
-                        border: InputBorder.none),
-                    onChanged: (value) {
-                      setState(() {
-                        _message = value;
-                      });
-                    },
-                  ),
-          ),
           Row(
-            mainAxisSize: MainAxisSize.min,
             children: [
               IconButton(
-                icon: Icon(Icons.camera_alt, color: Colors.amber),
-                onPressed: () {
-                  _cameraDialog(context);
-                },
+                  icon: Icon(
+                    Icons.emoji_emotions,
+                    color: Colors.deepPurple,
+                  ),
+                  onPressed: () {
+                    setState(() {
+                      isEmoji = !isEmoji;
+                    });
+                  }),
+              Expanded(
+                child: isRecord
+                    ? new Text('recording: ' + recordPosition.toString())
+                    : TextFormField(
+                        textCapitalization: TextCapitalization.sentences,
+                        autocorrect: true,
+                        enableSuggestions: true,
+                        controller: _controller,
+                        decoration: InputDecoration(
+                            labelText: 'Send a message...',
+                            border: InputBorder.none),
+                        onChanged: (value) {
+                          setState(() {
+                            _message = value;
+                          });
+                        },
+                      ),
               ),
-              InkWell(
-                child: Icon(isRecord ? Icons.mic_off : Icons.mic,
-                    color: Colors.amber),
-                onTap: () {
-                  isRecord ? _stopRecord() : _startRecord();
-                },
-              )
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  IconButton(
+                    icon: Icon(Icons.camera_alt, color: Colors.deepPurple),
+                    onPressed: () {
+                      _cameraDialog(context);
+                    },
+                  ),
+                  InkWell(
+                    child: Icon(isRecord ? Icons.mic_off : Icons.mic,
+                        color: Colors.deepPurple),
+                    onTap: () {
+                      isRecord ? _stopRecord() : _startRecord();
+                    },
+                  )
+                ],
+              ),
+              IconButton(
+                icon: Icon(Icons.send,
+                    color: _message.trim().isEmpty
+                        ? Colors.grey
+                        : Colors.deepPurple),
+                onPressed: _message.trim().isEmpty ? null : _sendMessage,
+              ),
             ],
           ),
-          IconButton(
-            icon: Icon(Icons.send,
-                color: _message.trim().isEmpty ? Colors.grey : Colors.amber),
-            onPressed: _message.trim().isEmpty ? null : _sendMessage,
-          ),
+          isEmoji
+              ? EmojiKeyboard(
+                  onEmojiSelected: onEmojiSelected,
+                )
+              : Container()
         ],
       ),
     );

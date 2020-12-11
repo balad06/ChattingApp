@@ -1,6 +1,7 @@
 import 'package:ChattingApp/login/loginScreen.dart';
 import 'package:ChattingApp/pages/chatScreen.dart';
 import 'package:ChattingApp/pages/mediaPreview.dart';
+import 'package:ChattingApp/widgets/media_enlarge.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -15,7 +16,6 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         primarySwatch: Colors.deepPurple,
@@ -35,6 +35,7 @@ class MyApp extends StatelessWidget {
       routes: {
         ChatScreen.id: (context) => ChatScreen(),
         MediaPreview.id: (context) => MediaPreview(),
+        Media.id:(context) => Media(),
       },
     );
   }

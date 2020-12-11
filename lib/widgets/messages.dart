@@ -1,4 +1,5 @@
 // import 'package:ChattingApp/widgets/image_bubble.dart';
+import 'package:ChattingApp/widgets/image_bubble.dart';
 import 'package:ChattingApp/widgets/message_bubble.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -28,7 +29,18 @@ class Messages extends StatelessWidget {
               final chatDocs = chatSnapshot.data.documents;
               return ListView.builder(
                 reverse: true,
-                itemBuilder: (ctx, i) => MessageBubble(
+                itemBuilder: (ctx, i) => chatDocs[i]['isImage']
+                    ? ImageBubble(
+                      message: chatDocs[i]['Text'],
+                        isMe: chatDocs[i]['userId'] == user.uid,
+                        key: ValueKey(
+                          chatDocs[i].documentID,
+                        ),
+                        username: chatDocs[i]['username'],
+                        userImageurl: chatDocs[i]['userImage'],
+                        chatImage: chatDocs[i]['imageUrl'],
+                    )
+                    : MessageBubble(
                         message: chatDocs[i]['Text'],
                         isMe: chatDocs[i]['userId'] == user.uid,
                         key: ValueKey(
